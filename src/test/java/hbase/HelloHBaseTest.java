@@ -14,6 +14,7 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class HelloHBaseTest {
+    Connection connection;
 
     @Before
     public void setUp() throws Exception {
@@ -32,7 +33,7 @@ public class HelloHBaseTest {
         // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
         // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
         // 也可以采用try finally方式防止泄露
-        Connection connection = ConnectionFactory.createConnection(conf);
+        connection = ConnectionFactory.createConnection(conf);
 
         System.out.println("连接成功，connection：" + connection.toString());
 
@@ -110,6 +111,7 @@ public class HelloHBaseTest {
 
     @After
     public void tearDown() throws Exception {
+        connection.close();
     }
 
     @Test
