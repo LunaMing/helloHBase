@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,6 +15,7 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class HelloHBaseTest {
+    HelloHBase helloHBase = new HelloHBase();
     Connection connection;
 
     @Before
@@ -107,7 +109,24 @@ public class HelloHBaseTest {
     }
 
     @Test
-    public void createTable() {
+    public void createTable() throws IOException {
+        //准备
+        String tableName = "Student";
+        String[] fields = {"S_No", "S_Name", "S_Sex", "S_Age"};
+        //创建
+        helloHBase.createTable(tableName, fields);
+        //验证
+        Table table = connection.getTable(TableName.valueOf(tableName));
+        //插入
+        Put put = new Put(Bytes.toBytes("0"));
+        put.addColumn(Bytes.toBytes("family"), Bytes.toBytes("qualifier"), Bytes.toBytes("value"));
+        table.put(put);
+        //获取
+        Get get = new Get(Bytes.toBytes("0"));
+        Result res = table.get(get);
+        byte[] value = res.getValue(Bytes.toBytes("family"), Bytes.toBytes("qualifier"));
+        //比对结果
+        Assert.assertArrayEquals(Bytes.toBytes("value"), value);
     }
 
     @Test
