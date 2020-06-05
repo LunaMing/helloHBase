@@ -79,10 +79,10 @@ public class HelloHBaseTest {
         System.out.println("单行读取结果为：" + res.toString());
 
         // 删除一行数据
-//                System.out.println("开始删除row...");
-//                Delete delete = new Delete(Bytes.toBytes("row"));
-//                table.delete(delete);
-//                System.out.println("row删除成功！");
+                System.out.println("开始删除row...");
+                Delete delete = new Delete(Bytes.toBytes("row"));
+                table.delete(delete);
+                System.out.println("row删除成功！");
 
         // 插入数据
         System.out.println("开始插入数据...");
@@ -117,16 +117,26 @@ public class HelloHBaseTest {
         helloHBase.createTable(tableName, fields);
         //验证
         Table table = connection.getTable(TableName.valueOf(tableName));
+        String rowName = "0";
+        byte[] rowByte = rowName.getBytes();
+        String familyName = "family";
+        byte[] familyByte = familyName.getBytes();
+        String qualifier = "qualifier";
+        byte[] qualiByte = qualifier.getBytes();
+        String value = "value";
+        byte[] valueByte = value.getBytes();
         //插入
-        Put put = new Put(Bytes.toBytes("0"));
-        put.addColumn(Bytes.toBytes("family"), Bytes.toBytes("qualifier"), Bytes.toBytes("value"));
+        Put put = new Put(rowByte);
+        put.addColumn(familyByte, qualiByte, valueByte);
         table.put(put);
         //获取
-        Get get = new Get(Bytes.toBytes("0"));
-        Result res = table.get(get);
-        byte[] value = res.getValue(Bytes.toBytes("family"), Bytes.toBytes("qualifier"));
+        Result res = table.get(new Get(rowByte));
+        byte[] resValue = res.getValue(familyByte, qualiByte);
         //比对结果
-        Assert.assertArrayEquals(Bytes.toBytes("value"), value);
+        Assert.assertArrayEquals(valueByte, resValue);
+        //删掉测试数据
+        Delete delete = new Delete(rowByte);
+        table.delete(delete);
     }
 
     @Test

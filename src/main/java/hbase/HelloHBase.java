@@ -6,8 +6,26 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class HelloHBase {
+
+    // 新建一个Configuration
+    private static Configuration conf = HBaseConfiguration.create();
+
+
+    //配置连接参数conf，包括连接地址、用户名、密码
+    static {
+        // 集群的连接地址，在控制台页面的数据库连接界面获得(注意公网地址和VPC内网地址)
+        conf.set("hbase.zookeeper.quorum", "hb-proxy-pub-bp15ttv4g8k160271-001.hbase.rds.aliyuncs.com:2181");
+        // 设置用户名密码，默认root:root，可根据实际情况调整
+        conf.set("hbase.client.username", "root");
+        conf.set("hbase.client.password", "root");
+        // 如果您直接依赖了阿里云hbase客户端，则无需配置connection.impl参数，如果您依赖了alihbase-connector，则需要配置此参数
+        //conf.set("hbase.client.connection.impl", AliHBaseUEClusterConnection.class.getName());
+    }
+
     public static void main(String[] args) {
     }
 
@@ -19,7 +37,36 @@ public class HelloHBase {
      * @param fields    存储记录各个域名称的数组
      */
     public void createTable(String tableName, String[] fields) {
-
+        System.out.println("开始创建表：" + tableName);
+        //连接
+        Connection connection = null;
+        // 建立连接
+        try {
+            // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
+            // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
+            // 也可以采用try finally方式防止泄露
+            connection = ConnectionFactory.createConnection(conf);
+            //创建表
+            TableDescriptor tableDescriptor = TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName)).build();
+            //所有域组
+            byte[][] regions = new byte[fields.length][];
+            //对每个域
+            for (int i = 0; i < fields.length; i++) {
+                regions[i] = Bytes.toBytes(fields[i]);
+            }
+            // 创建一个多分区的表
+            connection.getAdmin().createTable(tableDescriptor, regions);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //关闭连接
+                connection.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("table创建成功！");
     }
 
     /**
