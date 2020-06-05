@@ -37,7 +37,7 @@ public class HelloHBaseTest {
 
         System.out.println("连接成功，connection：" + connection.toString());
 
-        //DDL
+/*        //DDL
         Admin admin = connection.getAdmin();
 
         // 建表
@@ -58,10 +58,9 @@ public class HelloHBaseTest {
         // 删除表
 //                System.out.println("开始删除table...");
 //                admin.deleteTable(TableName.valueOf("tablename"));
-//                System.out.println("table删除成功！");
+//                System.out.println("table删除成功！");*/
 
-
-        //DML
+/*        //DML
         //Table 为非线程安全对象，每个线程在对Table操作时，都必须从Connection中获取相应的Table对象
         Table table = connection.getTable(TableName.valueOf("tablename"));
         // 插入数据
@@ -85,13 +84,6 @@ public class HelloHBaseTest {
 
         // 插入数据
         System.out.println("开始插入数据...");
-        Put put1 = new Put(Bytes.toBytes(0));
-        put1.addColumn(Bytes.toBytes("family"), Bytes.toBytes("abc1"), Bytes.toBytes("0"));
-        table.put(put1);
-        System.out.println("插入数据成功！");
-
-        // 插入数据
-        System.out.println("开始插入数据...");
         Put put2 = new Put(Bytes.toBytes(1));
         put2.addColumn(Bytes.toBytes("family"), Bytes.toBytes("abc2"), Bytes.toBytes("1"));
         table.put(put2);
@@ -106,7 +98,7 @@ public class HelloHBaseTest {
             // 处理查询结果result
             System.out.println("toString: " + result.toString());
         }
-        scanner.close();
+        scanner.close();*/
     }
 
     @After
