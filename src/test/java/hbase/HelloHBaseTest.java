@@ -252,6 +252,43 @@ public class HelloHBaseTest {
         connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
+    /**
+     * 查找不存在的列
+     */
+    @Test
+    public void scanColumnNotExist() throws IOException {
+        //准备
+        String tableName = "Student";
+        String cfName = "Score";
+        String[] cfNames = {cfName};
+        String cName = "Big Data";
+        String cfAndC = cfName + ":" + cName;
+        String[] cfAndCs = {cfAndC};
+        String value = "90";
+        String[] values = {value};
+        String rowName = "luna";
+        String notExistC = "notExist";
+        //创建
+        helloHBase.createTable(tableName, cfNames);
+        helloHBase.addRecord(tableName, rowName, cfAndCs, values);
+
+        //查找列
+        String findC = helloHBase.scanColumn(tableName, notExistC);
+        //验证
+        Assert.assertEquals(null, findC);
+
+        //删掉测试数据行
+        byte[] rowByte = rowName.getBytes();
+        Delete delete = new Delete(rowByte);
+        Table table = connection.getTable(TableName.valueOf(tableName));
+        table.delete(delete);
+        //删除测试表
+        //先停止表状态
+        connection.getAdmin().disableTable(TableName.valueOf(tableName));
+        //然后删除表
+        connection.getAdmin().deleteTable(TableName.valueOf(tableName));
+    }
+
     @Test
     public void modifyData() {
     }
