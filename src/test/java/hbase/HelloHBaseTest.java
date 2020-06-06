@@ -267,15 +267,21 @@ public class HelloHBaseTest {
         String value = "90";
         String[] values = {value};
         String rowName = "luna";
-        String notExistC = "notExist";
+        String notExistCf = "notExist";
+        String notExistCfAndC = "notExist:NullColumn";
         //创建
         helloHBase.createTable(tableName, cfNames);
         helloHBase.addRecord(tableName, rowName, cfAndCs, values);
 
         //查找列
-        String findC = helloHBase.scanColumn(tableName, notExistC);
+        String findC = helloHBase.scanColumn(tableName, notExistCfAndC);
         //验证
-        Assert.assertEquals(null, findC);
+        Assert.assertNull(findC);
+
+        //查找列族
+        String findCf = helloHBase.scanColumn(tableName, notExistCf);
+        //验证
+        Assert.assertNull(findCf);
 
         //删掉测试数据行
         byte[] rowByte = rowName.getBytes();
