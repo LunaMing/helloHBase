@@ -3,16 +3,13 @@ package hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 
 public class HelloHBase {
 
     // 新建一个Configuration
-    private static Configuration conf = HBaseConfiguration.create();
+    private static final Configuration conf = HBaseConfiguration.create();
 
 
     //配置连接参数conf，包括连接地址、用户名、密码
@@ -70,7 +67,9 @@ public class HelloHBase {
         } finally {
             try {
                 //关闭连接
-                connection.close();
+                if (connection != null) {
+                    connection.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
