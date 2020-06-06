@@ -31,7 +31,7 @@ public class HelloHBase {
      * 要求当 HBase 已经存在名为 tableName 的表的时候，先删除原有的表，然后再创建新的表。
      *
      * @param tableName 表的名称
-     * @param fields    存储记录各个列族名称的数组
+     * @param fields    存储记录各个列族名称的数组，这里就是cf的名字组
      */
     public void createTable(String tableName, String[] fields) {
         System.out.println("开始创建表：" + tableName);
@@ -87,7 +87,7 @@ public class HelloHBase {
      *
      * @param tableName 表名
      * @param row       行（用 S_Name 表示）
-     * @param fields    指定的单元格
+     * @param fields    指定的单元格（每个字符串格式是“columnFamily:column”）
      * @param values    数据
      */
     public void addRecord(String tableName, String row, String[] fields, String[] values) {

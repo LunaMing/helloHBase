@@ -4,7 +4,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,7 +11,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
 
 public class HelloHBaseTest {
     HelloHBase helloHBase = new HelloHBase();
@@ -113,8 +111,10 @@ public class HelloHBaseTest {
         //准备
         String tableName = "Student";
         String[] fields = {"S_No", "S_Name", "S_Sex", "S_Age"};
+
         //创建
         helloHBase.createTable(tableName, fields);
+
         //验证
         Table table = connection.getTable(TableName.valueOf(tableName));
         String rowName = "0";
@@ -144,17 +144,43 @@ public class HelloHBaseTest {
     }
 
     @Test
-    public void addRecord() {
+    public void addRecord() throws IOException {
         //准备
         String tableName = "Student";
-        String row = "row";
-        String[] fields = {};
-        String[] values = {};
-        helloHBase.createTable(tableName, fields);
-        //插入
-        helloHBase.addRecord(tableName, row, fields, values);
-        //验证
+        String sName = "zhangsan";
+        String[] columnFamily = {"Score"};
+        String[] column = {"Math", "Computer Science", "English"};
+        String[] cfAndColumn = {"Score:Math", "Score:Computer Science", "Score:English"};
+        String[] values = {"90", "80", "70"};
+        helloHBase.createTable(tableName, columnFamily);
 
+        //插入
+        helloHBase.addRecord(tableName, sName, cfAndColumn, values);
+
+        //验证
+        Table table = connection.getTable(TableName.valueOf(tableName));
+        //获取
+        byte[] rowByte = sName.getBytes();
+        Result res = table.get(new Get(rowByte));
+        for (int i = 0; i < 3; i++) {
+            String familyName = columnFamily[i];
+            byte[] familyByte = familyName.getBytes();
+            String qualifier = column[i];
+            byte[] qualiByte = qualifier.getBytes();
+            String value = values[i];
+            byte[] valueByte = value.getBytes();
+            byte[] resValue = res.getValue(familyByte, qualiByte);
+            //比对结果
+            Assert.assertArrayEquals(valueByte, resValue);
+        }
+        //删掉测试数据行
+        Delete delete = new Delete(rowByte);
+        table.delete(delete);
+        //删除测试表
+        //先停止表状态
+        connection.getAdmin().disableTable(TableName.valueOf(tableName));
+        //然后删除表
+        connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
     @Test
