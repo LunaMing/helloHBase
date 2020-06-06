@@ -186,7 +186,41 @@ public class HelloHBaseTest {
     }
 
     @Test
-    public void scanColumn() {
+    public void scanColumn() throws IOException {
+        //准备
+        String tableName = "Student";
+        String cfName = "Score";
+        String[] cfNames = {cfName};
+        String cName = "Big Data";
+        String cfAndC = cfName + ":" + cName;
+        String[] cfAndCs = {cfAndC};
+        String value = "90";
+        String[] values = {value};
+        String rowName = "luna";
+        //创建
+        helloHBase.createTable(tableName, cfNames);
+        helloHBase.addRecord(tableName, rowName, cfAndCs, values);
+
+        //查找列
+        String findC = helloHBase.scanColumn(tableName, cfAndC);
+        //验证
+        Assert.assertEquals(value, findC);
+        //查找列族
+        String findCf = helloHBase.scanColumn(tableName, cfName);
+        //验证
+        String expectedFindCf = cName + ":" + value;
+        Assert.assertEquals(expectedFindCf, findCf);
+
+        //删掉测试数据行
+        byte[] rowByte = rowName.getBytes();
+        Delete delete = new Delete(rowByte);
+        Table table = connection.getTable(TableName.valueOf(tableName));
+        table.delete(delete);
+        //删除测试表
+        //先停止表状态
+        connection.getAdmin().disableTable(TableName.valueOf(tableName));
+        //然后删除表
+        connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
     @Test

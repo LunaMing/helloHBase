@@ -111,6 +111,7 @@ public class HelloHBase {
                 String column = cfAndC[1];
                 //数据内容
                 String value = values[i];
+                System.out.println("数据列：" + row + ":" + field + ":" + value);
                 //建立字节流用于插入
                 byte[] familyByte = cf.getBytes();
                 byte[] qualiByte = column.getBytes();
@@ -142,10 +143,12 @@ public class HelloHBase {
      * 当参数 column 为某一列具体名称（例如“Score:Math”）时，只需要列出该列的数据。
      *
      * @param tableName 表名
-     * @param column    列名 或 列族名
+     * @param column    列名（格式为"Score:Math"） 或 列族名（"Score"）
+     * @return 数据内容（如果是查看列，格式为"80"；如果是查看列族，格式为"Math:80, English:90"）
      */
-    public void scanColumn(String tableName, String column) {
-
+    public String scanColumn(String tableName, String column) {
+        String res = "";
+        return res;
     }
 
     /**
