@@ -186,7 +186,7 @@ public class HelloHBaseTest {
     }
 
     @Test
-    public void scanColumn() throws IOException {
+    public void scanColumnOneValue() throws IOException {
         //准备
         String tableName = "Student";
         String cfName = "Score";
@@ -202,15 +202,51 @@ public class HelloHBaseTest {
         helloHBase.addRecord(tableName, rowName, cfAndCs, values);
 
         //查找列
-        String findC = helloHBase.scanColumn(tableName, cfAndC);
+        String[] findC = helloHBase.scanColumn(tableName, cfAndC);
         //验证
-        Assert.assertEquals(value, findC);
+        String expectedStr = rowName + ":" + value;
+        Assert.assertEquals(value, findC[0]);
 
         //删掉测试数据行
         byte[] rowByte = rowName.getBytes();
         Delete delete = new Delete(rowByte);
         Table table = connection.getTable(TableName.valueOf(tableName));
         table.delete(delete);
+        //删除测试表
+        //先停止表状态
+        connection.getAdmin().disableTable(TableName.valueOf(tableName));
+        //然后删除表
+        connection.getAdmin().deleteTable(TableName.valueOf(tableName));
+    }
+
+    @Test
+    public void scanColumnValues() throws IOException {
+        //准备
+        String tableName = "Student";
+        String cfName = "Score";
+        String[] cfNames = {cfName};
+        String cName = "Big Data";
+        String cfAndC = cfName + ":" + cName;
+        String[] cfAndCs = {cfAndC};
+        String[] values = {"90", "91"};
+        String[] rowNames = {"luna", "alice"};
+        //创建
+        //创建表
+        helloHBase.createTable(tableName, cfNames);
+        //插入行
+        for (String rowName : rowNames) {
+            helloHBase.addRecord(tableName, rowName, cfAndCs, values);
+        }
+
+        //查找列
+        String[] findC = helloHBase.scanColumn(tableName, cfAndC);
+        //验证
+        for (int i = 0; i < rowNames.length; i++) {
+            String expectedS = rowNames[i] + ":" + values[i];
+            String[] expectedSs = {expectedS};
+            Assert.assertEquals(expectedSs, findC);
+        }
+
         //删除测试表
         //先停止表状态
         connection.getAdmin().disableTable(TableName.valueOf(tableName));
@@ -234,11 +270,11 @@ public class HelloHBaseTest {
         helloHBase.createTable(tableName, cfNames);
         helloHBase.addRecord(tableName, rowName, cfAndCs, values);
 
-        //查找列族
-        String findCf = helloHBase.scanColumn(tableName, cfName);
-        //验证
-        String expectedFindCf = cName + ":" + value;
-        Assert.assertEquals(expectedFindCf, findCf);
+//        //查找列族
+//        String[] findCf = helloHBase.scanColumn(tableName, cfName);
+//        //验证
+//        String expectedFindCf = cName + ":" + value;
+//        Assert.assertEquals(expectedFindCf, findCf);
 
         //删掉测试数据行
         byte[] rowByte = rowName.getBytes();
@@ -274,12 +310,12 @@ public class HelloHBaseTest {
         helloHBase.addRecord(tableName, rowName, cfAndCs, values);
 
         //查找列
-        String findC = helloHBase.scanColumn(tableName, notExistCfAndC);
+        String[] findC = helloHBase.scanColumn(tableName, notExistCfAndC);
         //验证
         Assert.assertNull(findC);
 
         //查找列族
-        String findCf = helloHBase.scanColumn(tableName, notExistCf);
+        String[] findCf = helloHBase.scanColumn(tableName, notExistCf);
         //验证
         Assert.assertNull(findCf);
 

@@ -6,6 +6,8 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelloHBase {
 
@@ -25,6 +27,9 @@ public class HelloHBase {
     }
 
     public static void main(String[] args) {
+        HelloHBase helloHBase = new HelloHBase();
+        helloHBase.createTable("Student", new String[]{"Score", "C_No", "C_credit", "Student"});
+        helloHBase.addRecord("Student", "zhangsan", new String[]{"Score:Math", "Score:English"}, new String[]{"80", "90"});
     }
 
     /**
@@ -145,12 +150,15 @@ public class HelloHBase {
      *
      * @param tableName 表名
      * @param column    列名（格式为"Score:Math"） 或 列族名（"Score"）
-     * @return 数据内容（如果是查看列，格式为"80"；如果是查看列族，格式为"Math:80, English:90"）
+     * @return 数据内容
+     * 如果是查看列，格式为{"row0:80", "row1:81"}；
+     * 如果是查看列族，格式为{"row0:Math:80", ”row0:English:90“, ”row1:Math:81"}
+     * 如果任意一行的寻找列族中的任意一列不存在，就返回null
      */
-    public String scanColumn(String tableName, String column) {
+    public String[] scanColumn(String tableName, String column) {
         System.out.println("开始查找" + tableName + "表数据");
 
-        String res = null;
+        List<String> res = new ArrayList<>();
         //连接
         Connection connection = null;
         // 建立连接
@@ -182,10 +190,16 @@ public class HelloHBase {
                     byte[] familyByte = cf.getBytes();
                     byte[] qualiByte = c.getBytes();
                     //拿到真实数据
-                    res = Bytes.toString(result.getValue(familyByte, qualiByte));
+                    String finsStr = Bytes.toString(result.getValue(familyByte, qualiByte));
+                    if (finsStr == null) {
+                        //如果查找结果为空，直接退出查找，返回null
+                        return null;
+                    }
+                    res.add(finsStr);
                 } else {
                     //如果没有，说明是一个列族
                     System.out.println("要查找一个列族");
+                    return null;//todo
                 }
 
             }
@@ -204,7 +218,7 @@ public class HelloHBase {
         }
 
         System.out.println("查找结束，结果为：" + res);
-        return res;
+        return res.toArray(new String[0]);
     }
 
     /**
