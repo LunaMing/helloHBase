@@ -162,7 +162,7 @@ public class HelloHBaseTest {
         //获取
         byte[] rowByte = sName.getBytes();
         Result res = table.get(new Get(rowByte));
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < column.length; i++) {
             String familyName = columnFamily[i];
             byte[] familyByte = familyName.getBytes();
             String qualifier = column[i];
