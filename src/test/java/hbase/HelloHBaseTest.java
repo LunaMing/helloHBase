@@ -339,6 +339,19 @@ public class HelloHBaseTest {
 
     @Test
     public void modifyData() {
+        //准备
+        String tableName = "Student";
+        String cfName = "Score";
+        String[] cfNames = {cfName};
+        String cName = "Big Data";
+        String cfAndC = cfName + ":" + cName;
+        String[] cfAndCs = {cfAndC};
+        String[] values = {"90", "91"};
+        String[] rowNames = {"luna", "alice"};
+        //修改数据
+        helloHBase.modifyData(tableName, rowNames[0], cfAndC, values[1]);
+        //验证
+        String[] Strs = helloHBase.scanColumn(tableName, cfAndC);
     }
 
     @Test

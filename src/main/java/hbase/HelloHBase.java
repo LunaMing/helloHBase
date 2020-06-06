@@ -30,6 +30,11 @@ public class HelloHBase {
         HelloHBase helloHBase = new HelloHBase();
         helloHBase.createTable("Student", new String[]{"Score", "C_No", "C_credit", "Student"});
         helloHBase.addRecord("Student", "zhangsan", new String[]{"Score:Math", "Score:English"}, new String[]{"80", "90"});
+        helloHBase.scanColumn("Student","Score:Math");
+        helloHBase.modifyData("Student","zhangsan","Score:Math","99");
+        helloHBase.scanColumn("Student","Score:Math");
+        helloHBase.deleteRow("Student","zhangsan");
+        helloHBase.scanColumn("Student","Score:Math");
     }
 
     /**
@@ -167,8 +172,6 @@ public class HelloHBase {
             // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
             // 也可以采用try finally方式防止泄露
             connection = ConnectionFactory.createConnection(conf);
-            Admin admin = connection.getAdmin();
-
             Table table = connection.getTable(TableName.valueOf(tableName));
             //扫描表格所有数据
             Scan scan = new Scan();
@@ -238,10 +241,50 @@ public class HelloHBase {
      *
      * @param tableName 表名
      * @param row       行（用学生姓名 S_Name 表示）
-     * @param column    列
+     * @param column    列（格式为“Score:Math”）
+     * @param newValue  新的数据值
      */
-    public void modifyData(String tableName, String row, String column) {
-
+    public void modifyData(String tableName, String row, String column, String newValue) {
+        System.out.println("修改数据表" + tableName + "的行：" + row + "，列:" + "，新的值为：" + newValue);
+        Put p = new Put(Bytes.toBytes("001"));
+        //连接
+        Connection connection = null;
+        // 建立连接
+        try {
+            // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
+            // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
+            // 也可以采用try finally方式防止泄露
+            connection = ConnectionFactory.createConnection(conf);
+            Table table = connection.getTable(TableName.valueOf(tableName));
+            byte[] rowByte = row.getBytes();
+            //插入过程
+            //分割fields
+            String[] cfAndC = column.split(":");
+            String cf = cfAndC[0];
+            String c = cfAndC[1];
+            //数据内容
+            System.out.println("数据列：" + row + ":" + column + ":" + newValue);
+            //建立字节流用于插入
+            byte[] familyByte = cf.getBytes();
+            byte[] qualiByte = c.getBytes();
+            byte[] valueByte = newValue.getBytes();
+            //插入
+            Put put = new Put(rowByte);
+            put.addColumn(familyByte, qualiByte, valueByte);
+            table.put(put);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //关闭连接
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("修改成功！");
     }
 
     /**
@@ -251,6 +294,32 @@ public class HelloHBase {
      * @param row       行（用学生姓名 S_Name 表示）
      */
     public void deleteRow(String tableName, String row) {
-
+        System.out.println("删除数据表" + tableName + "中的行：" + row);
+        //连接
+        Connection connection = null;
+        // 建立连接
+        try {
+            // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
+            // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
+            // 也可以采用try finally方式防止泄露
+            connection = ConnectionFactory.createConnection(conf);
+            Table table = connection.getTable(TableName.valueOf(tableName));
+            //删掉测试数据行
+            byte[] rowByte = row.getBytes();
+            Delete delete = new Delete(rowByte);
+            table.delete(delete);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //关闭连接
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("删除成功！");
     }
 }
