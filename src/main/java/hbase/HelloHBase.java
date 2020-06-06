@@ -34,7 +34,7 @@ public class HelloHBase {
      * 要求当 HBase 已经存在名为 tableName 的表的时候，先删除原有的表，然后再创建新的表。
      *
      * @param tableName 表的名称
-     * @param fields    存储记录各个域名称的数组
+     * @param fields    存储记录各个列族名称的数组
      */
     public void createTable(String tableName, String[] fields) {
         System.out.println("开始创建表：" + tableName);
@@ -46,16 +46,25 @@ public class HelloHBase {
             // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
             // 也可以采用try finally方式防止泄露
             connection = ConnectionFactory.createConnection(conf);
-            //创建表
-            TableDescriptor tableDescriptor = TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName)).build();
-            //所有域组
-            byte[][] regions = new byte[fields.length][];
-            //对每个域
-            for (int i = 0; i < fields.length; i++) {
-                regions[i] = Bytes.toBytes(fields[i]);
+            Admin admin = connection.getAdmin();
+            //判断存在
+            if (admin.tableExists(TableName.valueOf(tableName))) {
+                //如果已经存在
+                //就删除这个表
+                //先停止表状态
+                admin.disableTable(TableName.valueOf(tableName));
+                //然后删除表
+                admin.deleteTable(TableName.valueOf(tableName));
             }
-            // 创建一个多分区的表
-            connection.getAdmin().createTable(tableDescriptor, regions);
+            //现在表不存在
+            //创建这个表
+            HTableDescriptor hTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
+            //创建cf
+            for (String f : fields) {
+                hTableDescriptor.addFamily(new HColumnDescriptor(f));
+            }
+            // 创建一个分区的表
+            admin.createTable(hTableDescriptor);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

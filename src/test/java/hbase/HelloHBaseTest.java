@@ -119,7 +119,7 @@ public class HelloHBaseTest {
         Table table = connection.getTable(TableName.valueOf(tableName));
         String rowName = "0";
         byte[] rowByte = rowName.getBytes();
-        String familyName = "family";
+        String familyName = "S_No";
         byte[] familyByte = familyName.getBytes();
         String qualifier = "qualifier";
         byte[] qualiByte = qualifier.getBytes();
