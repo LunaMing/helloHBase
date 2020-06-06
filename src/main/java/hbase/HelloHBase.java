@@ -91,7 +91,48 @@ public class HelloHBase {
      * @param values    数据
      */
     public void addRecord(String tableName, String row, String[] fields, String[] values) {
-
+        System.out.println("在表" + tableName + "开始插入数据");
+        //连接
+        Connection connection = null;
+        // 建立连接
+        try {
+            // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
+            // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
+            // 也可以采用try finally方式防止泄露
+            connection = ConnectionFactory.createConnection(conf);
+            Table table = connection.getTable(TableName.valueOf(tableName));
+            byte[] rowByte = row.getBytes();
+            //插入过程
+            for (int i = 0; i < fields.length; i++) {
+                //分割fields
+                String field = fields[i];
+                String[] cfAndC = field.split(":");
+                String cf = cfAndC[0];
+                String column = cfAndC[1];
+                //数据内容
+                String value = values[i];
+                //建立字节流用于插入
+                byte[] familyByte = cf.getBytes();
+                byte[] qualiByte = column.getBytes();
+                byte[] valueByte = value.getBytes();
+                //插入
+                Put put = new Put(rowByte);
+                put.addColumn(familyByte, qualiByte, valueByte);
+                table.put(put);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //关闭连接
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("插入数据成功！");
     }
 
     /**

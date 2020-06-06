@@ -163,12 +163,14 @@ public class HelloHBaseTest {
         byte[] rowByte = sName.getBytes();
         Result res = table.get(new Get(rowByte));
         for (int i = 0; i < column.length; i++) {
-            String familyName = columnFamily[i];
-            byte[] familyByte = familyName.getBytes();
+            String familyName = columnFamily[0];
             String qualifier = column[i];
-            byte[] qualiByte = qualifier.getBytes();
             String value = values[i];
+            //转字节流
+            byte[] familyByte = familyName.getBytes();
+            byte[] qualiByte = qualifier.getBytes();
             byte[] valueByte = value.getBytes();
+            //拿到真实数据
             byte[] resValue = res.getValue(familyByte, qualiByte);
             //比对结果
             Assert.assertArrayEquals(valueByte, resValue);
