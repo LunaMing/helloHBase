@@ -170,12 +170,13 @@ public class HelloHBase {
             Admin admin = connection.getAdmin();
 
             Table table = connection.getTable(TableName.valueOf(tableName));
-            //Scan所有数据
+            //扫描表格所有数据
             Scan scan = new Scan();
             ResultScanner resultScanner = table.getScanner(scan);
-
+            //对于每一行
             for (Result result : resultScanner) {
-                System.out.println("行：" + new String(result.getRow()));
+                String rowName = new String(result.getRow());
+                System.out.println("行：" + rowName);
                 //分隔符
                 CharSequence ch = ":";
                 if (column.contains(ch)) {
@@ -190,16 +191,26 @@ public class HelloHBase {
                     byte[] familyByte = cf.getBytes();
                     byte[] qualiByte = c.getBytes();
                     //拿到真实数据
-                    String finsStr = Bytes.toString(result.getValue(familyByte, qualiByte));
-                    if (finsStr == null) {
+                    String findValue = Bytes.toString(result.getValue(familyByte, qualiByte));
+                    if (findValue == null) {
                         //如果查找结果为空，直接退出查找，返回null
                         return null;
                     }
-                    res.add(finsStr);
+                    res.add(rowName + ":" + findValue);
                 } else {
                     //如果没有，说明是一个列族
                     System.out.println("要查找一个列族");
-                    return null;//todo
+                    //转字节流
+                    byte[] familyByte = column.getBytes();
+                    //todo
+//                    byte[] qualiByte = c.getBytes();
+//                    //拿到真实数据
+//                    String findValue = Bytes.toString(result.getValue(familyByte, qualiByte));
+//                    if (findValue == null) {
+//                        //如果查找结果为空，直接退出查找，返回null
+//                        return null;
+//                    }
+//                    res.add(rowName + ":" + findValue);
                 }
 
             }

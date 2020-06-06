@@ -208,7 +208,7 @@ public class HelloHBaseTest {
         String[] findC = helloHBase.scanColumn(tableName, cfAndC);
         //验证
         String expectedStr = rowName + ":" + value;
-        Assert.assertEquals(value, findC[0]);
+        Assert.assertEquals(expectedStr, findC[0]);
 
         //删掉测试数据行
         byte[] rowByte = rowName.getBytes();
