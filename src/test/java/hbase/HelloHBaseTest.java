@@ -137,10 +137,16 @@ public class HelloHBaseTest {
         //删掉测试数据
         Delete delete = new Delete(rowByte);
         table.delete(delete);
+        //先停止表状态
+        connection.getAdmin().disableTable(TableName.valueOf(tableName));
+        //然后删除表
+        connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
     @Test
     public void addRecord() {
+
+//        helloHBase.addRecord(TableName.valueOf("Student"), "row", new String[]fields, String[]values);
     }
 
     @Test
