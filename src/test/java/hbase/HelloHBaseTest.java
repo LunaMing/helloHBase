@@ -145,8 +145,16 @@ public class HelloHBaseTest {
 
     @Test
     public void addRecord() {
+        //准备
+        String tableName = "Student";
+        String row = "row";
+        String[] fields = {};
+        String[] values = {};
+        helloHBase.createTable(tableName, fields);
+        //插入
+        helloHBase.addRecord(tableName, row, fields, values);
+        //验证
 
-//        helloHBase.addRecord(TableName.valueOf("Student"), "row", new String[]fields, String[]values);
     }
 
     @Test
