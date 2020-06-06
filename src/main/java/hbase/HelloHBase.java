@@ -3,6 +3,7 @@ package hbase;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.*;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
 
@@ -147,7 +148,62 @@ public class HelloHBase {
      * @return 数据内容（如果是查看列，格式为"80"；如果是查看列族，格式为"Math:80, English:90"）
      */
     public String scanColumn(String tableName, String column) {
-        String res = "";
+        System.out.println("开始查找" + tableName + "表数据");
+
+        String res = null;
+        //连接
+        Connection connection = null;
+        // 建立连接
+        try {
+            // 创建 HBase连接，在程序生命周期内只需创建一次，该连接线程安全，可以共享给所有线程使用。
+            // 在程序结束后，需要将Connection对象关闭，否则会造成连接泄露。
+            // 也可以采用try finally方式防止泄露
+            connection = ConnectionFactory.createConnection(conf);
+            Admin admin = connection.getAdmin();
+
+            Table table = connection.getTable(TableName.valueOf(tableName));
+            //Scan所有数据
+            Scan scan = new Scan();
+            ResultScanner resultScanner = table.getScanner(scan);
+
+            for (Result result : resultScanner) {
+                System.out.println("行：" + new String(result.getRow()));
+                //分隔符
+                CharSequence ch = ":";
+                if (column.contains(ch)) {
+                    //如果有冒号，说明是一个列
+                    System.out.println("要查找一个列");
+                    //分割
+                    String[] splitColumn = column.split(":");
+                    String cf = splitColumn[0];
+                    String c = splitColumn[1];
+                    System.out.println("查找列族" + cf + "中的列：" + c);
+                    //转字节流
+                    byte[] familyByte = cf.getBytes();
+                    byte[] qualiByte = c.getBytes();
+                    //拿到真实数据
+                    res = Bytes.toString(result.getValue(familyByte, qualiByte));
+                } else {
+                    //如果没有，说明是一个列族
+                    System.out.println("要查找一个列族");
+                }
+
+            }
+            resultScanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                //关闭连接
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("查找结束，结果为：" + res);
         return res;
     }
 
