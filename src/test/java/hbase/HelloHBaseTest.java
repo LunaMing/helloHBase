@@ -185,6 +185,9 @@ public class HelloHBaseTest {
         connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
+    /**
+     * 查找一个value
+     */
     @Test
     public void scanColumnOneValue() throws IOException {
         //准备
@@ -219,6 +222,9 @@ public class HelloHBaseTest {
         connection.getAdmin().deleteTable(TableName.valueOf(tableName));
     }
 
+    /**
+     * 查找多个value
+     */
     @Test
     public void scanColumnValues() throws IOException {
         //准备
